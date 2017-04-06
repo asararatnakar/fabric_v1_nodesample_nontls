@@ -1,10 +1,5 @@
 # Fabric V1 alpha based NodeSDK sample with TLS disabled 
 
-
-## THIS IS NOT WORKING CODE , INSTANTIATION IS FAILING DONOT USE THIS CODE
-
-The code is from [fabric-sdk-node](https://github.com/hyperledger/fabric-sdk-node.git) repository from e2e integration test code, with TLS disabled
-
 ### Steps to run the sample
 
 #### STEP1: Clone the repo
