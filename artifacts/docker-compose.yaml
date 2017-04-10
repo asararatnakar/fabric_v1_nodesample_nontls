@@ -55,14 +55,21 @@ services:
       - CORE_LOGGING_LEVEL=ERROR
       - CORE_NEXT=true
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
       - CORE_PEER_ID=peer0
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_LOCALMSPID=Org1MSP
       - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
-      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_ADDRESS=peer0:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     ports:
@@ -73,6 +80,7 @@ services:
         - ./crypto-config/peerOrganizations/peerOrg1/peers/peerOrg1Peer1/:/etc/hyperledger/msp/peer
     depends_on:
       - orderer0
+      - couchdb0
 
   peer1:
     container_name: peer1
@@ -81,7 +89,6 @@ services:
       - CORE_LOGGING_LEVEL=ERROR
       - CORE_NEXT=true
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
       - CORE_PEER_ID=peer1
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_LOCALMSPID=Org1MSP
@@ -89,7 +96,14 @@ services:
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_ADDRESS=peer1:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb1:5984
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     ports:
@@ -101,6 +115,7 @@ services:
     depends_on:
       - orderer0
       - peer0
+      - couchdb1
 
   peer2:
     container_name: peer2
@@ -109,7 +124,6 @@ services:
       - CORE_LOGGING_LEVEL=ERROR
       - CORE_NEXT=true
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
       - CORE_PEER_ID=peer2
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_LOCALMSPID=Org2MSP
@@ -117,7 +131,14 @@ services:
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_ADDRESS=peer2:7051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer2:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer2:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb2:5984
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     ports:
@@ -128,6 +149,7 @@ services:
         - ./crypto-config/peerOrganizations/peerOrg2/peers/peerOrg2Peer1/:/etc/hyperledger/msp/peer
     depends_on:
       - orderer0
+      - couchdb2
 
   peer3:
     container_name: peer3
@@ -136,7 +158,6 @@ services:
       - CORE_LOGGING_LEVEL=ERROR
       - CORE_NEXT=true
       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
       - CORE_PEER_ID=peer3
       - CORE_PEER_ENDORSER_ENABLED=true
       - CORE_PEER_LOCALMSPID=Org2MSP
@@ -144,6 +165,14 @@ services:
       - CORE_PEER_GOSSIP_ORGLEADER=false
       - CORE_PEER_GOSSIP_USELEADERELECTION=true
       - CORE_PEER_ADDRESS=peer3:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer3:7051
+      - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+      # the following setting starts chaincode containers on the same
+      # bridge network as the peers
+      # https://docs.docker.com/compose/networking/
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=artifacts_default
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb3:5984
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric
     command: peer node start --peer-defaultchain=false
     ports:
@@ -155,14 +184,29 @@ services:
     depends_on:
       - orderer0
       - peer2
+      - couchdb3
 
-  couchdb:
-    container_name: couchdb
-    image: couchdb
+  couchdb0:
+    container_name: couchdb0
+    image: hyperledger/fabric-couchdb:x86_64-1.0.0-alpha
     ports:
       - 5984:5984
-    environment:
-      COUCHDB_USER: admin
-      COUCHDB_PASSWORD: password
-      DB_URL: http://localhost:5984/member_db
+
+  couchdb1:
+    container_name: couchdb1
+    image: hyperledger/fabric-couchdb:x86_64-1.0.0-alpha
+    ports:
+      - 6984:5984
+
+  couchdb2:
+    container_name: couchdb2
+    image: hyperledger/fabric-couchdb:x86_64-1.0.0-alpha
+    ports:
+      - 7984:5984
+
+  couchdb3:
+    container_name: couchdb3
+    image: hyperledger/fabric-couchdb:x86_64-1.0.0-alpha
+    ports:
+      - 8984:5984
 
